@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .chat-container {
+      background: #ffffff;
+      width: 400px;
+      max-width: 90vw;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-header {
+      background: #1976d2;
+      color: #ffffff;
+      padding: 12px 16px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .chat-messages {
+      padding: 12px 16px;
+      height: 300px;
+      overflow-y: auto;
+      background: #fafafa;
+    }
+    .message {
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .message.user {
+      text-align: right;
+      color: #0d47a1;
+    }
+    .message.bot {
+      text-align: left;
+      color: #333333;
+    }
+    .chat-input-area {
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+    .chat-input-area input {
+      flex: 1;
+      border: none;
+      padding: 10px;
+      font-size: 14px;
+      outline: none;
+    }
+    .chat-input-area button {
+      border: none;
+      background: #1976d2;
+      color: #ffffff;
+      padding: 0 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .chat-input-area button:hover {
+      background: #1259a0;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">My Chatbot</div>
+    <div id="chatMessages" class="chat-messages">
+      <div class="message bot">Hello! Type something below and hit Send.</div>
+    </div>
+    <div class="chat-input-area">
+      <input id="userInput" type="text" placeholder="Type your message..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    // This will point to your backend once we create it
+    const API_URL = "https://YOUR-BACKEND-URL/chat";
+
+    const chatMessages = document.getElementById('chatMessages');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function appendMessage(text, sender) {
+      const div = document.createElement('div');
+      div.classList.add('message', sender);
+      div.textContent = text;
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      appendMessage(text, 'user');
+      userInput.value = '';
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        });
+
+        const data = await response.json();
+        appendMessage(data.reply || "No response", 'bot');
+      } catch (error) {
+        appendMessage("Error contacting server.", "bot");
+      }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
